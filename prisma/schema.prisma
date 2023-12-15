@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model File {
+  id    Int    @id @default(autoincrement())
+  name  String
+  filedata  Bytes
+}
+
+
+model PdfFile {
+  id Int @id @default(autoincrement())
+  version fileversion[]
+
+}
+
+
+model fileversion {
+  id Int @id @default(autoincrement())
+  pdfFileId Int
+  pdfv PdfFile @relation(fields: [pdfFileId], references: [id])
+  pdfname String
+  // The contents of the PDF file version
+  pdfdata Bytes
+  pdftype String
+  version Int  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+   
+}
+
+
+model pdf {
+  id Int @id @default(autoincrement())
+  pdfname String
+  pdfdata Bytes
+  pdftype String
+  version Int  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  versions version[]
+}
+
+model version {
+  id Int @id @default(autoincrement())
+  fileid Int
+  Fileid pdf @relation(fields: [fileid], references: [id])  
+  pdfname String
+  pdfdata Bytes
+  pdftype String
+  version Int  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+
+}
