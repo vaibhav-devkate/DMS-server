@@ -49,6 +49,7 @@ model pdf {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   versions version[]
+  relatedDocuments RelatedDocument[]
 }
 
 model version {
@@ -63,4 +64,11 @@ model version {
   updatedAt DateTime @updatedAt
  
 
+}
+
+model RelatedDocument {
+id Int @id @default(autoincrement())
+maindocid Int
+pdfid    Int
+pdf pdf@relation(fields: [maindocid], references: [id])
 }

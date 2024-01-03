@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseFilePipeBuilder } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseFilePipeBuilder, Res } from '@nestjs/common';
 import { DocVersionService } from './doc-version.service';
 import { CreateDocVersionDto } from './dto/create-doc-version.dto';
 import { UpdateDocVersionDto } from './dto/update-doc-version.dto';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 //import { Response } from 'express';
 
 @Controller('doc-version')
@@ -52,10 +53,34 @@ export class DocVersionController {
 
 
 
+ 
+  @Get(':id')
+  async findOne(@Param('id') id: string, @Res() res: Response) {
+    const file = await this.docVersionService.findOne(+id);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=${file.pdfname}`);
+    res.send(file.pdfdata);
+  }
+
+  @Get(':id/latest-version')
+  async latestVersion(@Param('id') id: string) {
+    return this.docVersionService.latestVersion(+id);
+  }
+ 
 
 
-
-
+   @Get('revision/:id')
+   findOneversions(@Param('id') id: string){
+    return this.docVersionService.findOneversions(+id);
+    
+   }
+   @Get(':documentId/revision/:versionId')
+   async findOneversionsData(@Param('documentId') documentId: string, @Param('versionId') versionId: string, @Res() res: Response){
+   const file2 = await this.docVersionService.findOneversionsData(+documentId, +versionId);
+   res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=${file2.pdfname}`);
+    res.send(file2.pdfdata);
+}
 
   @Get('')
   findAll() {

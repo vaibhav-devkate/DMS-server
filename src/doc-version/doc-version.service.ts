@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateDocVersionDto } from './dto/create-doc-version.dto';
 import { UpdateDocVersionDto } from './dto/update-doc-version.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+// import { RelatedDocumentDto } from './dto/related-document.dto'
+//import { version } from 'os';
 
 @Injectable()
 export class DocVersionService {
@@ -10,15 +12,24 @@ export class DocVersionService {
   async uploadPdf(createDocVersionDto: CreateDocVersionDto,filedata: Express.Multer.File){
     try {
       const version = Number(createDocVersionDto.version);
+    //  const relatedDocumentsJson = createDocVersionDto.relatedDocuments;
+    
+    //   const parsedRelatedDocuments = JSON.parse(relatedDocumentsJson);
+
       const result = await this.prisma.pdf.create({
         data: {
           pdfname:createDocVersionDto.pdfname,
           pdfdata:filedata.buffer,
           pdftype:createDocVersionDto.pdftype,
-          version:version
+          version:version,
+          // relatedDocuments: {
+          //   connect: parsedRelatedDocuments.map(relatedDocument => ({ id: relatedDocument.pdfid  })),
+          // },
 
         },
       });
+
+     
 
      
      
@@ -67,10 +78,27 @@ export class DocVersionService {
   //   console.log(`This action returns a #${id} document`);
   //   return await this.prisma.pdf.findUnique({ where: { id } });
   // }
+  
+  async findOne(id: number) {
+     
+      return await this.prisma.pdf.findUnique({ where: { id } });
+    }
+
+
+    async latestVersion(id: number) {
+     
+      return await this.prisma.pdf.findUnique({ where: { id }
+        ,
+        select:{
+          
+          version: true,
+          
+        } }); 
+    }
 
   async findAll() {
     
-    console.log('This action returns all documents');    
+   
     return await this.prisma.pdf.findMany(
       {
         select:{
@@ -84,8 +112,26 @@ export class DocVersionService {
 
   async findOneversions(id: number) {
     
-    console.log(`This action returns a #${id} document`);
-    return await this.prisma.version.findMany({ where: { fileid: id  } });
+    // console.log(`This action returns a #${id} document`);
+    return await this.prisma.version.findMany({ where: { fileid: id  },
+      select:{
+        id:true,
+        pdfname: true,
+        version: true,
+        fileid:true
+      } });
+  }
+
+  async findOneversionsData(documentId: number,versionId:number) {
+    
+    // console.log(`This action returns a #${id} document`);
+    return await this.prisma.version.findFirst({ where: {
+      AND: [
+        { fileid: documentId },
+        { version: versionId },
+      ]
+    },
+       });
   }
 
   async update(id: number, updateDocVersionDto: UpdateDocVersionDto,filedata: Express.Multer.File) {

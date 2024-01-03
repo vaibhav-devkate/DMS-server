@@ -1,7 +1,7 @@
 //export class CreateDocVersionDto {}
 import { ApiProperty } from '@nestjs/swagger';
-import {  IsNotEmpty } from 'class-validator';
-
+import {   IsNotEmpty } from 'class-validator';
+//import { RelatedDocumentDto } from './related-document.dto';
 export class CreateDocVersionDto {
   @ApiProperty({ type: 'string' })
   @IsNotEmpty()
@@ -20,5 +20,9 @@ export class CreateDocVersionDto {
   @IsNotEmpty()
   version: number;
 
+
+ @IsNotEmpty()
+ relatedDocuments: string[];
+ 
  
 }
