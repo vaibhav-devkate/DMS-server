@@ -20,9 +20,9 @@ export class CreateDocVersionDto {
   @IsNotEmpty()
   version: number;
 
-
- @IsNotEmpty()
- relatedDocuments: string[];
+  @ApiProperty({ type: ['string'] })
+  @IsNotEmpty()
+  selectedOptions: string;
  
  
 }

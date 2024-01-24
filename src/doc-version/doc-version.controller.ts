@@ -15,8 +15,8 @@ export class DocVersionController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('pdfdata'))
   @ApiBody({type: CreateDocVersionDto,})
-  uploadPdf(
-    @Body()createDocVersionDto: CreateDocVersionDto,
+  async uploadPdf(
+    @Body('')createDocVersionDto: CreateDocVersionDto,
     @UploadedFile(
       new ParseFilePipeBuilder()
       .addFileTypeValidator({
@@ -31,11 +31,14 @@ export class DocVersionController {
 
     )
     pdfdata : Express.Multer.File
-
   )
   {
-    
+    // console.log("createDocVersionDto");
+    // console.log(createDocVersionDto);
+    // console.log("selectedOptions");
+    // console.log(createDocVersionDto.selectedOptions);
     return this.docVersionService.uploadPdf(createDocVersionDto,pdfdata);
+   
   }
 
 
@@ -66,7 +69,21 @@ export class DocVersionController {
   async latestVersion(@Param('id') id: string) {
     return this.docVersionService.latestVersion(+id);
   }
+
+  
+  @Get('related/:id')
+  async relatedDocfunc(@Param('id') id: string) {
+  
+    const relatedDocuments = await this.docVersionService.relatedDoc(+id);
  
+ const pdfDetails = [];
+ for (const document of relatedDocuments) {
+   const pdfDetail = await this.docVersionService.findNamefromId(document.pdfid)
+   pdfDetails.push(pdfDetail);
+ }
+ 
+ return pdfDetails;
+  }
 
 
    @Get('revision/:id')

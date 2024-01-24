@@ -11,73 +11,45 @@ export class DocVersionService {
 
   async uploadPdf(createDocVersionDto: CreateDocVersionDto,filedata: Express.Multer.File){
     try {
-      const version = Number(createDocVersionDto.version);
-    //  const relatedDocumentsJson = createDocVersionDto.relatedDocuments;
     
-    //   const parsedRelatedDocuments = JSON.parse(relatedDocumentsJson);
-
       const result = await this.prisma.pdf.create({
         data: {
           pdfname:createDocVersionDto.pdfname,
           pdfdata:filedata.buffer,
           pdftype:createDocVersionDto.pdftype,
-          version:version,
-          // relatedDocuments: {
-          //   connect: parsedRelatedDocuments.map(relatedDocument => ({ id: relatedDocument.pdfid  })),
-          // },
-
+          version:Number(createDocVersionDto.version),
         },
       });
+      console.log(createDocVersionDto.selectedOptions)
+      const obj = JSON.parse(createDocVersionDto.selectedOptions);
+      console.log(obj)
+      for (const pdfId of obj) {
+      
+       console.log(pdfId)
 
-     
+        await this.prisma.relatedDocument.create({
+          data: {
+            maindocid: result.id,
+            pdfid: pdfId,
+        }
+      });
+      }
 
-     
-     
        return {
       message: 'PDF file uploaded and stored in the database successfully',
       pdfFileId: result.id,
      
     };
   } catch (error) {
-    console.log(error);
+    console.log('error>>>',error);
     throw new Error('Failed to store PDF in the database');
   }
 
     
   }
 
-//   async uploadPdf(createDocVersionDto: CreateDocVersionDto,filedata: Express.Multer.File) : Promise<FileVersionDto[]>{
-//     try {
-//      const buffer = filedata.buffer;
-//      const fileVersion = new createDocVersionDto.FileVersion();
-//      fileVersion.pdfFileId = pdfFile.id;
-//      const fileCreateInput = {
-//        fileVersion= createDocVersionDto.fileVersions;
-//      };
-//      const result = await this.prisma.pdfFile.create({
-//        data: fileCreateInput,
-//      });
-
-   
-//    return {
-//      message: 'PDF file uploaded and stored in the database successfully',
-//      pdfFileId: result.id, 
-//    };
-//  } catch (error) {
-//    console.log(error);
-//    throw new Error('Failed to store PDF in the database');
-//  }
-// }
-
-  // create(createDocVersionDto: CreateDocVersionDto) {
-  //   return 'This action adds a new docVersion';
-  // }
 
 
-  // async findOne(id: number) {
-  //   console.log(`This action returns a #${id} document`);
-  //   return await this.prisma.pdf.findUnique({ where: { id } });
-  // }
   
   async findOne(id: number) {
      
@@ -94,6 +66,10 @@ export class DocVersionService {
           version: true,
           
         } }); 
+    }
+
+    async findNamefromId(id: number){
+return this.prisma.pdf.findUnique({ where: { id: id } ,select:{ pdfname: true, id:true }});
     }
 
   async findAll() {
@@ -119,6 +95,16 @@ export class DocVersionService {
         pdfname: true,
         version: true,
         fileid:true
+      } });
+  }
+
+  async relatedDoc(id: number) {
+    
+    // console.log(`This action returns a #${id} document`);
+    return await this.prisma.relatedDocument.findMany({ where: { maindocid: id  },
+      select:{
+        pdfid: true,
+        
       } });
   }
 
