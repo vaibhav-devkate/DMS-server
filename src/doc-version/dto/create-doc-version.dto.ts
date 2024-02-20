@@ -21,7 +21,6 @@ export class CreateDocVersionDto {
   version: number;
 
   @ApiProperty({ type: ['string'] })
-  @IsNotEmpty()
   selectedOptions: string;
  
  
